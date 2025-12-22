@@ -1,0 +1,157 @@
+import { VitalSigns } from './simulator';
+import { predictPriority } from './ml-service';
+
+export type PriorityLevel = 1 | 2 | 3 | 4;
+
+export type AIAnalysis = {
+    priority: PriorityLevel;
+    summary: string;
+    reasoning: string;
+    suggested_action: string;
+    timestamp: number;
+    source: string;
+};
+
+const OLLAMA_URL = '/api/ollama/generate';
+const MODEL_NAME = 'llama3.2:1b';
+
+const SYSTEM_PROMPT = `
+You are an expert ICU Intensivist.
+The patient's vital signs have been analyzed and assigned a Priority Level based on clinical rules.
+Your task is to generate a clinical summary and reasoning that explains WHY this priority was assigned.
+
+Input Data:
+- Vitals: HR, SBP, SpO2, etc.
+- Assigned Priority: 1 (Critical), 2 (Urgent), 3 (Warning), or 4 (Normal).
+
+Output Format: JSON ONLY.
+{
+  "summary": "<Short clinical summary>",
+  "reasoning": "<Explain the priority based on the abnormal vitals>",
+  "suggested_action": "<Clinical recommendation>"
+}
+`;
+
+export function calculatePriority(vitals: VitalSigns): { priority: PriorityLevel; reason: string } {
+    if (vitals.hr < 40 || (vitals.sbp < 90 && (vitals.hr > 100 || vitals.hr < 50)) || vitals.spo2 < 85 || vitals.rr > 30) {
+        return { priority: 1, reason: "Critical instability (Severe bradycardia, Hemodynamic shock, Hypoxia<85, or RR>30)" };
+    }
+    if (vitals.sbp < 100 || (vitals.spo2 >= 85 && vitals.spo2 < 90) || vitals.hr > 120 || (vitals.temp > 39 && vitals.hr > 100)) {
+        return { priority: 2, reason: "Urgent deterioration (Hypotension, Hypoxia 85-90, Tachycardia >120, or Sepsis)" };
+    }
+    if ((vitals.hr > 100 && vitals.hr <= 120) || vitals.sbp > 160 || (vitals.spo2 >= 90 && vitals.spo2 < 94)) {
+        return { priority: 3, reason: "Warning signs (Mild Tachycardia, Hypertension, or SpO2 90-94)" };
+    }
+    return { priority: 4, reason: "Vitals within normal limits" };
+}
+
+
+export async function analyzeVitals(vitals: VitalSigns): Promise<AIAnalysis> {
+    // 1. AI/ML Priority Prediction
+    const { priority, confidence } = await predictPriority(vitals);
+
+    // We can still use the rule-based reason for context if needed, or let the LLM infer.
+    // Let's get the rule-based reason just for comparison or fallback context if we wanted,
+    // but for the prompt, let's rely on the LLM's ability to explain the ML's decision.
+    // However, to keep the prompt helpful, we can say "Suspected Cause: [Rule Reason]" if we want,
+    // but the user asked to move AWAY from if-else.
+    // So let's pass the confidence.
+
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+        const promptText = `
+Patient Vitals:
+- Heart Rate: ${vitals.hr} bpm
+- Systolic BP: ${vitals.sbp} mmHg
+- Diastolic BP: ${vitals.dbp} mmHg
+- SpO2: ${vitals.spo2} %
+- Respiratory Rate: ${vitals.rr} /min
+- Temperature: ${vitals.temp} C
+
+ASSIGNED PRIORITY: ${priority}
+AI CONFIDENCE: ${(confidence * 100).toFixed(1)}%
+`;
+
+        console.log(`[AI Service] Sending request to ${OLLAMA_URL} (Model: ${MODEL_NAME})...`);
+
+        const response = await fetch(OLLAMA_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model: MODEL_NAME,
+                system: SYSTEM_PROMPT,
+                prompt: promptText,
+                stream: false
+            }),
+            signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Ollama API Error: ${response.status} ${response.statusText} - ${errorText}`);
+        }
+
+        const data = await response.json();
+        console.log("[AI Service] Response received:", data);
+        console.log("[AI Service] Response.response value:", data.response);
+
+        // Extract JSON from response (handle markdown code blocks)
+        let jsonText = data.response;
+
+        // Remove markdown code blocks if present
+        jsonText = jsonText.replace(/```json\s*/g, '').replace(/```\s*/g, '');
+
+        // Try to find JSON object in the text
+        const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+            jsonText = jsonMatch[0];
+        }
+
+        console.log("[AI Service] Extracted JSON:", jsonText);
+        const result = JSON.parse(jsonText);
+
+        return {
+            priority: priority, // Enforce the calculated priority
+            summary: result.summary,
+            reasoning: result.reasoning,
+            suggested_action: result.suggested_action,
+            timestamp: Date.now(),
+            source: `Ollama (${MODEL_NAME})`
+        };
+
+    } catch (error) {
+        console.error("[AI Service] Analysis failed:", error);
+        return runFallbackAnalysis(vitals);
+    }
+}
+
+export function runFallbackAnalysis(vitals: VitalSigns): AIAnalysis {
+    const { priority, reason } = calculatePriority(vitals);
+
+    let summary = "Patient is stable.";
+    let action = "Continue monitoring.";
+
+    if (priority === 1) {
+        summary = "CRITICAL INSTABILITY DETECTED";
+        action = "ACTIVATE RAPID RESPONSE TEAM IMMEDIATELY.";
+    } else if (priority === 2) {
+        summary = "Urgent Clinical Deterioration";
+        action = "Assess airway, breathing, circulation. Consider fluid bolus or O2 therapy.";
+    } else if (priority === 3) {
+        summary = "Abnormal Vitals - Warning";
+        action = "Increase monitoring frequency. Check patient comfort/pain.";
+    }
+
+    return {
+        priority,
+        summary,
+        reasoning: reason,
+        suggested_action: action,
+        timestamp: Date.now(),
+        source: 'Fallback (Rule Engine)'
+    };
+}
