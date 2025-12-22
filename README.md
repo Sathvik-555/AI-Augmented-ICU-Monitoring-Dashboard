@@ -24,7 +24,7 @@ The system uses a hybrid AI approach:
 ## Prerequisites
 
 *   **Node.js** (v18+)
-*   **Python** (v3.9+) (Only strictly needed if you want to retrain the underlying model)
+*   **Python** (v3.9) (Required for model training)
 *   **Ollama**: Install from [ollama.com](https://ollama.com/)
 
 ## Setup & Installation
@@ -61,8 +61,7 @@ The project includes a pre-trained model in `public/models/vital-monitor`. If yo
     ```bash
     python -m venv venv
     source venv/bin/activate  # On Windows: .\venv\Scripts\activate
-    pip install pandas numpy tensorflow vitaldb
-    pip install tensorflowjs  # For converting the model
+    pip install -r requirements.txt
     ```
 
 2.  Run the training script:
