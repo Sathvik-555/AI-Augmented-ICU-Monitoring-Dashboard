@@ -1,87 +1,108 @@
-# AI-Augmented ICU Monitoring Dashboard
+# 🏥 AI-Augmented ICU Monitoring Dashboard
 
-This project is an **AI-Augmented ICU Monitoring Dashboard** designed to interpret vital sign streams, generate natural language summaries, and prioritize alerts to mitigate "Alarm Fatigue" in clinical settings.
+An advanced dashboard that monitors patient vital signs and uses local AI to provide real-time clinical insights and priority alerts.
 
-The system uses a hybrid AI approach:
-1.  **Quantitative Analysis**: A **TensorFlow.js** neural network (trained on VitalDB data) runs in the browser to predict clinical priority (Critical, Urgent, Warning, Normal) in real-time.
-2.  **Qualitative Analysis**: A local Large Language Model (**Ollama**) acts as an "AI Cortex", providing human-readable explanations, reasoning, and actionable recommendations based on the quantitative data.
+## ✨ Features
 
-## Features
+*   **Real-time Monitoring**: Visualizes live vital signs (Heart Rate, BP, SpO2, RR, Temp).
+*   **AI Cortex**: Uses a local Large Language Model (**Ollama**) to explain patient status in plain English.
+*   **Smart Alerts**: A neural network (TensorFlow.js) predicts clinical priority levels (Critical, Urgent, Warning, Normal).
+*   **Offline Privacy**: All data processing and AI analysis happen locally on your machine.
 
-*   **Real-time Vital Signs Monitoring**: Simulates or reads live ICU data (Heart Rate, BP, SpO2, RR, Temp).
-*   **AI Cortex**: Integrated with Ollama to provide clinical contextual analysis.
-*   **Intelligent Priority System**: Predictive model (not just if-else rules) to classify patient status.
-*   **Visual Dashboard**: Modern, responsive UI built with React & Tailwind CSS.
-*   **Offline Mode**: All AI components (TF.js model and Ollama) run locally, ensuring privacy and reliability without internet.
+---
 
-## Tech Stack
+## 🛠️ Prerequisites
 
-*   **Frontend**: React, Vite, TypeScript, Tailwind CSS, Recharts, Lucide React.
-*   **AI/ML (Browser)**: TensorFlow.js.
-*   **AI/ML (Backend/Training)**: Python, TensorFlow (Keras), VitalDB (for training data).
-*   **LLM Integration**: Ollama (running local models like `llama3` or `mistral`).
+Before you begin, ensure you have the following installed:
 
-## Prerequisites
+1.  **Node.js** (v18 or higher): [Download Link](https://nodejs.org/)
+2.  **Ollama**: [Download Link](https://ollama.com/)
+3.  **(Optional) Python 3.9**: Only required if you plan to retrain the ML model.
 
-*   **Node.js** (v18+)
-*   **Python** (v3.9) (Required for model training)
-*   **Ollama**: Install from [ollama.com](https://ollama.com/)
+---
 
-## Setup & Installation
+## 🚀 How to Run the Project
 
-### 1. Clone various components
+Follow these steps to get the dashboard up and running.
+
+### Step 1: Clone the Repository
+
 ```bash
-git clone <repository-url>
-cd AIML_Lab_Antigravity
+git clone https://github.com/Sathvik-555/AI-Augmented-ICU-Monitoring-Dashboard.git
+cd AI-Augmented-ICU-Monitoring-Dashboard
 ```
 
-### 2. Install Frontend Dependencies
+### Step 2: Install Frontend Dependencies
+
+This project uses Vite and React. Install the necessary packages:
+
 ```bash
 npm install
 ```
 
-### 3. Setup Ollama (The Brain)
-Ensure Ollama is installed and running. Pull the model you intend to use (default is usually `llama3` or `mistral`, check `src/lib/ai-service.ts` if unsure):
-```bash
-ollama pull llama3
-ollama serve
-```
+### Step 3: Start the AI Engine (Ollama)
 
-### 4. Run the Application
+The dashboard relies on Ollama for its "AI Cortex" feature.
+
+1.  Open a terminal and pull the AI model (we recommend `llama3`):
+    ```bash
+    ollama pull llama3
+    ```
+2.  Start the Ollama server:
+    ```bash
+    ollama serve
+    ```
+    ⚠️ **Keep this terminal window open.** The dashboard communicates with this local server.
+
+### Step 4: Start the Dashboard
+
+Open a **new** terminal window in the project directory and run:
+
 ```bash
 npm run dev
 ```
-Open `http://localhost:5173` in your browser.
 
-## Model Training (Optional)
+Open your browser and navigate to `http://localhost:5173`. You should see the dashboard with live simulated data.
 
-The project includes a pre-trained model in `public/models/vital-monitor`. If you wish to retrain it using fresh data from VitalDB:
+---
 
-1.  Set up the Python environment:
-    ```bash
-    python -m venv venv
-    source venv/bin/activate  # On Windows: .\venv\Scripts\activate
-    pip install -r requirements.txt
-    ```
+## 🧠 Model Training (Advanced & Optional)
 
-2.  Run the training script:
-    ```bash
-    python scripts/train_model.py
-    ```
-    This will:
-    *   Fetch real clinical cases from VitalDB.
-    *   Label them using expert clinical system rules.
-    *   Train a Neural Network.
-    *   Convert and save the model to `public/models/vital-monitor` for the frontend to use.
+The dashboard comes with a pre-trained neural network (`public/models/vital-monitor`). You **ONLY** need to follow these steps if you want to retrain the model with fresh data from VitalDB.
 
-## Project Structure
+### 1. Setup Python Environment
+We recommend using **Python 3.9**.
 
-*   `src/`: Frontend React application.
-    *   `src/lib/simulator.ts`: Simulates patient vital signs.
-    *   `src/lib/ai-service.ts`: Handles communication with Ollama.
-*   `scripts/`: Python scripts for data fetching and model training.
-*   `public/models/`: Contains the converted TensorFlow.js model files.
+```bash
+# Create a virtual environment
+python -m venv venv
 
-## License
+# Activate the environment (Windows)
+.\venv\Scripts\activate
+
+# Install dependencies from requirements.txt
+pip install -r requirements.txt
+```
+
+### 2. Run the Training Script
+This script fetches data, trains a new model, and converts it for the web.
+
+```bash
+python scripts/train_model.py
+```
+
+The new model files will be automatically saved to `public/models/vital-monitor`, ready for the frontend to use.
+
+---
+
+## 📂 Project Structure
+
+*   `src/` - React frontend code.
+    *   `components/` - UI components (Graphs, Feed, Cards).
+    *   `lib/` - Logic for AI services and Data Simulation.
+*   `scripts/` - Python scripts for ML training.
+*   `public/models/` - The converted TensorFlow.js model.
+
+## 📄 License
 
 [MIT](LICENSE)
