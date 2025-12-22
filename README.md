@@ -44,9 +44,9 @@ npm install
 
 The dashboard relies on Ollama for its "AI Cortex" feature.
 
-1.  Open a terminal and pull the AI model (we recommend `llama3`):
+1.  Open a terminal and pull the AI model (we use `llama3.2:1b` for speed, but you can change this in `src/lib/ai-service.ts`):
     ```bash
-    ollama pull llama3
+    ollama pull llama3.2:1b
     ```
 2.  Start the Ollama server:
     ```bash
@@ -103,6 +103,4 @@ The new model files will be automatically saved to `public/models/vital-monitor`
 *   `scripts/` - Python scripts for ML training.
 *   `public/models/` - The converted TensorFlow.js model.
 
-## 📄 License
 
-[MIT](LICENSE)
