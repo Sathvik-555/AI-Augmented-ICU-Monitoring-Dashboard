@@ -12,8 +12,13 @@ export type AIAnalysis = {
     source: string;
 };
 
-const OLLAMA_URL = '/api/ollama/generate';
-const MODEL_NAME = 'llama3.2:1b';
+export interface AIConfig {
+    ollamaUrl: string;
+    modelName: string;
+}
+
+const DEFAULT_URL = '/api/ollama/generate';
+const DEFAULT_MODEL = 'llama3.2:1b';
 
 const SYSTEM_PROMPT = `
 You are an expert ICU Intensivist.
@@ -46,16 +51,13 @@ export function calculatePriority(vitals: VitalSigns): { priority: PriorityLevel
 }
 
 
-export async function analyzeVitals(vitals: VitalSigns): Promise<AIAnalysis> {
+export async function analyzeVitals(vitals: VitalSigns, config?: AIConfig): Promise<AIAnalysis> {
     // 1. AI/ML Priority Prediction
     const { priority, confidence } = await predictPriority(vitals);
 
-    // We can still use the rule-based reason for context if needed, or let the LLM infer.
-    // Let's get the rule-based reason just for comparison or fallback context if we wanted,
-    // but for the prompt, let's rely on the LLM's ability to explain the ML's decision.
-    // However, to keep the prompt helpful, we can say "Suspected Cause: [Rule Reason]" if we want,
-    // but the user asked to move AWAY from if-else.
-    // So let's pass the confidence.
+    // Config defaults
+    const ollamaUrl = config?.ollamaUrl || DEFAULT_URL;
+    const modelName = config?.modelName || DEFAULT_MODEL;
 
     try {
         const controller = new AbortController();
@@ -74,13 +76,13 @@ ASSIGNED PRIORITY: ${priority}
 AI CONFIDENCE: ${(confidence * 100).toFixed(1)}%
 `;
 
-        console.log(`[AI Service] Sending request to ${OLLAMA_URL} (Model: ${MODEL_NAME})...`);
+        console.log(`[AI Service] Sending request to ${ollamaUrl} (Model: ${modelName})...`);
 
-        const response = await fetch(OLLAMA_URL, {
+        const response = await fetch(ollamaUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                model: MODEL_NAME,
+                model: modelName,
                 system: SYSTEM_PROMPT,
                 prompt: promptText,
                 stream: false
@@ -120,7 +122,7 @@ AI CONFIDENCE: ${(confidence * 100).toFixed(1)}%
             reasoning: result.reasoning,
             suggested_action: result.suggested_action,
             timestamp: Date.now(),
-            source: `Ollama (${MODEL_NAME})`
+            source: `Ollama (${modelName})`
         };
 
     } catch (error) {
