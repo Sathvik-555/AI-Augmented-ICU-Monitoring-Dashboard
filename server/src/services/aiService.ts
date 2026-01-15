@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
-const OLLAMA_URL = 'http://localhost:11434/api/generate';
+const OLLAMA_URL = 'http://127.0.0.1:11434/api/generate';
 const MODEL_NAME = 'llama3.2:1b';
 
 // Helper to call Ollama
@@ -76,4 +76,63 @@ export async function predictWithHistory(patientId: string, vitals: any) {
     } catch (e) {
         return { priority: 4, reason: rawResponse, suggestion: "Monitor manually" };
     }
+}
+
+export async function chatWithPatient(patientId: string, message: string): Promise<string> {
+    const patient = await prisma.patient.findUnique({
+        where: { id: patientId },
+        select: { patientContextSummary: true, name: true, condition: true, gender: true, age: true }
+    });
+
+    if (!patient) return "Error: Patient not found.";
+
+    const context = patient.patientContextSummary || "No detailed history available.";
+
+    const systemPrompt = `You are a helpful medical assistant for patient ${patient.name} (${patient.age}, ${patient.gender}). 
+    Condition: ${patient.condition}.
+    Medical History: ${context}
+    
+    Answer the doctor's question accurately based on the history. If unknown, say so. Keep answers professional and clinical.`;
+
+    const userPrompt = message;
+
+    return await callOllama(userPrompt, systemPrompt);
+}
+
+export async function generateHandoverReport(patientId: string, vitals: any): Promise<string> {
+    const patient = await prisma.patient.findUnique({
+        where: { id: patientId },
+        select: { patientContextSummary: true, name: true, condition: true, gender: true, age: true, bed: true }
+    });
+
+    if (!patient) return "Error: Patient not found.";
+
+    const context = patient.patientContextSummary || "No history.";
+
+    const systemPrompt = `You are a senior nurse writing a shift handover report.`;
+
+    const userPrompt = `
+    Generate a formal SBAR (Situation, Background, Assessment, Recommendation) handover report.
+    
+    PATIENT: ${patient.name} (${patient.age}y ${patient.gender})
+    BED: ${patient.bed?.label || 'Unassigned'}
+    CONDITION: ${patient.condition}
+    
+    CURRENT VITALS:
+    HR: ${vitals.hr}
+    BP: ${vitals.sbp}/${vitals.dbp}
+    SpO2: ${vitals.spo2}%
+    RR: ${vitals.rr}
+    Temp: ${vitals.temp}C
+    
+    BACKGROUND/HISTORY:
+    ${context}
+    
+    INSTRUCTIONS:
+    - Format as Markdown.
+    - Be concise.
+    - Highlight abnormalities.
+    `;
+
+    return await callOllama(userPrompt, systemPrompt);
 }

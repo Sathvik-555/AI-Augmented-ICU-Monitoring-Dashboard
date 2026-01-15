@@ -10,6 +10,9 @@ import { VitalCard } from './VitalCard';
 import { Activity, Heart, Wind, Thermometer, ArrowLeft, Upload, FileText, Brain } from 'lucide-react';
 import { PatientConfig } from './PatientMiniCard'; // Re-using type or defining new one
 import ReactMarkdown from 'react-markdown'; // Import ReactMarkdown
+import { ChatModal } from './ChatModal';
+import { HandoverModal } from './HandoverModal';
+import { MessageCircle, FileOutput } from 'lucide-react';
 
 // Define types locally or import if shared
 interface MedicalRecord {
@@ -38,6 +41,9 @@ export function SinglePatientView({ aiSettings }: SinglePatientViewProps) {
     const [patient, setPatient] = useState<PatientDetails | null>(null);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'monitor' | 'history'>('monitor');
+    const [isChatOpen, setIsChatOpen] = useState(false);
+    const [isHandoverOpen, setIsHandoverOpen] = useState(false);
+
 
     // Simulator state
     const [scenario, setScenario] = useState<ClinicalScenario>('NORMAL');
@@ -161,21 +167,38 @@ export function SinglePatientView({ aiSettings }: SinglePatientViewProps) {
                     </div>
                 </div>
 
-                <div className="flex gap-2 bg-clinical-800 p-1 rounded-lg">
-                    {patient.status !== 'DISCHARGED' && (
-                        <button
-                            onClick={() => setActiveTab('monitor')}
-                            className={`px-4 py-2 rounded-md transition-all ${activeTab === 'monitor' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
-                        >
-                            Real-time Monitor
-                        </button>
-                    )}
+                <div className="flex gap-2">
                     <button
-                        onClick={() => setActiveTab('history')}
-                        className={`px-4 py-2 rounded-md transition-all ${activeTab === 'history' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
+                        onClick={() => setIsChatOpen(true)}
+                        className="bg-clinical-800 hover:bg-slate-700 text-slate-300 p-2 rounded-lg border border-slate-700 transition-colors"
+                        title="Chat with AI Agent"
                     >
-                        Patient Profile & History
+                        <MessageCircle className="w-5 h-5 text-blue-400" />
                     </button>
+                    <button
+                        onClick={() => setIsHandoverOpen(true)}
+                        className="bg-clinical-800 hover:bg-slate-700 text-slate-300 p-2 rounded-lg border border-slate-700 transition-colors"
+                        title="Generate Handover Report"
+                    >
+                        <FileOutput className="w-5 h-5 text-purple-400" />
+                    </button>
+
+                    <div className="flex gap-2 bg-clinical-800 p-1 rounded-lg">
+                        {patient.status !== 'DISCHARGED' && (
+                            <button
+                                onClick={() => setActiveTab('monitor')}
+                                className={`px-4 py-2 rounded-md transition-all ${activeTab === 'monitor' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
+                            >
+                                Real-time Monitor
+                            </button>
+                        )}
+                        <button
+                            onClick={() => setActiveTab('history')}
+                            className={`px-4 py-2 rounded-md transition-all ${activeTab === 'history' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
+                        >
+                            Patient Profile & History
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -264,6 +287,21 @@ export function SinglePatientView({ aiSettings }: SinglePatientViewProps) {
             )}
 
             <AlertFeed alerts={alerts} onDismiss={handleDismiss} />
+
+            <ChatModal
+                isOpen={isChatOpen}
+                onClose={() => setIsChatOpen(false)}
+                patientId={id || ''}
+                patientName={patient ? patient.name : 'Unknown'}
+            />
+
+            <HandoverModal
+                isOpen={isHandoverOpen}
+                onClose={() => setIsHandoverOpen(false)}
+                patientId={id || ''}
+                patientName={patient ? patient.name : 'Unknown'}
+                vitals={vitals}
+            />
         </div>
     );
 }

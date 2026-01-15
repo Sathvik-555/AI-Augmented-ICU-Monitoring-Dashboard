@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 const API_BASE = 'http://localhost:3001/api';
 
@@ -48,5 +48,25 @@ export async function dischargePatient(bedId: string) {
         method: 'POST'
     });
     if (!res.ok) throw new Error('Discharge failed');
+    return res.json();
+}
+
+export async function sendAIChatMessage(patientId: string, message: string) {
+    const res = await fetch(`${API_BASE}/ai/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ patientId, message })
+    });
+    if (!res.ok) throw new Error('Chat failed');
+    return res.json();
+}
+
+export async function fetchHandoverReport(patientId: string, vitals: any) {
+    const res = await fetch(`${API_BASE}/ai/handover`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ patientId, vitals })
+    });
+    if (!res.ok) throw new Error('Handover generation failed');
     return res.json();
 }

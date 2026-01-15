@@ -1,15 +1,26 @@
 import { Router } from 'express';
 import multer from 'multer';
 import { PrismaClient } from '@prisma/client';
-const pdfParse = require('pdf-parse');
-import fs from 'fs';
-import path from 'path';
+const PDFParser = require("pdf2json");
+// import fs from 'fs'; // No longer needed for buffer reading if we use loadPDF, but let's keep imports clean
 
 import { generateSummary } from '../services/aiService';
 
 const router = Router();
 const prisma = new PrismaClient();
 const upload = multer({ dest: 'uploads/' });
+
+// Helper for pdf2json
+function parsePDF(filePath: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const pdfParser = new PDFParser(null, 1);
+        pdfParser.on("pdfParser_dataError", (errData: any) => reject(errData.parserError));
+        pdfParser.on("pdfParser_dataReady", () => {
+            resolve(pdfParser.getRawTextContent());
+        });
+        pdfParser.loadPDF(filePath);
+    });
+}
 
 router.post('/:patientId/history', upload.single('file'), async (req, res) => {
     const patientId = req.params.patientId as string;
@@ -20,9 +31,8 @@ router.post('/:patientId/history', upload.single('file'), async (req, res) => {
     }
 
     try {
-        const dataBuffer = fs.readFileSync(file.path);
-        const data = await pdfParse(dataBuffer);
-        const extractedText = data.text;
+        // Use new parser
+        const extractedText = await parsePDF(file.path);
 
         // Generate Summary
         const summary = await generateSummary(extractedText);
