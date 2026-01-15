@@ -26,26 +26,62 @@ function normalize(vitals: VitalSigns): number[] {
     ];
 }
 
-function generateSyntheticData(count: number) {
+// function generateSyntheticData(count: number) {
+//     const inputs: number[][] = [];
+//     const labels: number[] = [];
+
+//     for (let i = 0; i < count; i++) {
+//         // Generate random vitals covering a wide range
+//         const vitals: VitalSigns = {
+//             hr: Math.random() * 180 + 30,    // 30 - 210
+//             sbp: Math.random() * 180 + 60,   // 60 - 240
+//             dbp: Math.random() * 100 + 40,   // 40 - 140
+//             spo2: Math.random() * 30 + 70,   // 70 - 100
+//             rr: Math.random() * 40 + 8,      // 8 - 48
+//             temp: Math.random() * 8 + 34,    // 34 - 42
+//             timestamp: Date.now()
+//         };
+
+//         const { priority } = calculatePriority(vitals);
+
+//         inputs.push(normalize(vitals));
+//         // Map priority 1-4 to class index 0-3
+//         labels.push(priority - 1);
+//     }
+
+//     return {
+//         inputs: tf.tensor2d(inputs),
+//         labels: tf.oneHot(tf.tensor1d(labels, 'int32'), 4)
+//     };
+// }
+
+// load the actual data:
+async function loadTrainingDataFromCSV() {
+    const response = await fetch('/data/icu_train.csv');
+    const text = await response.text();
+
+    const lines = text.trim().split('\n');
+//   const headers = lines[0].split(',');
+
     const inputs: number[][] = [];
     const labels: number[] = [];
 
-    for (let i = 0; i < count; i++) {
-        // Generate random vitals covering a wide range
-        const vitals: VitalSigns = {
-            hr: Math.random() * 180 + 30,    // 30 - 210
-            sbp: Math.random() * 180 + 60,   // 60 - 240
-            dbp: Math.random() * 100 + 40,   // 40 - 140
-            spo2: Math.random() * 30 + 70,   // 70 - 100
-            rr: Math.random() * 40 + 8,      // 8 - 48
-            temp: Math.random() * 8 + 34,    // 34 - 42
+    for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(',').map(Number);
+
+        const vitals = {
+            hr: values[0],
+            sbp: values[1],
+            dbp: values[2],
+            spo2: values[3],
+            rr: values[4],
+            temp: values[5],
             timestamp: Date.now()
         };
 
         const { priority } = calculatePriority(vitals);
 
         inputs.push(normalize(vitals));
-        // Map priority 1-4 to class index 0-3
         labels.push(priority - 1);
     }
 
@@ -54,6 +90,7 @@ function generateSyntheticData(count: number) {
         labels: tf.oneHot(tf.tensor1d(labels, 'int32'), 4)
     };
 }
+
 
 export async function trainModel() {
     if (model || isTraining) return;
@@ -72,7 +109,7 @@ export async function trainModel() {
             metrics: ['accuracy']
         });
 
-        const { inputs, labels } = generateSyntheticData(2000);
+        const { inputs, labels } = await loadTrainingDataFromCSV();
 
         await newModel.fit(inputs, labels, {
             epochs: 20,
@@ -89,6 +126,7 @@ export async function trainModel() {
 
         model = newModel;
         console.log('[ML Service] Model training complete.');
+        console.log('[ML] Number of training samples:', inputs.shape[0]);
 
         // Cleanup tensors
         inputs.dispose();
