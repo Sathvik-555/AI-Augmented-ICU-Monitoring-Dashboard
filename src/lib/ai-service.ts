@@ -51,6 +51,10 @@ export function calculatePriority(vitals: VitalSigns): { priority: PriorityLevel
 }
 
 
+// Retaining existing code but acknowledging update needed.
+// Only modifying analyzeVitals to be ready for backend switch if needed.
+// For now, I will keep it as is since SinglePatientView uses it.
+// I will implement backend integration for analyzeVitals in next step to be cleaner.
 export async function analyzeVitals(vitals: VitalSigns, config?: AIConfig): Promise<AIAnalysis> {
     // 1. AI/ML Priority Prediction
     const { priority, confidence } = await predictPriority(vitals);
