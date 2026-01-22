@@ -11,12 +11,12 @@ const patients = [
             AGE: 45
             GENDER: Male
             
-            ADMISSION DIAGNOSIS: Community Acquired Pneumonia (Severe)
+            ADMISSION DIAGNOSIS: Traumatic Brain Injury & Femur Fracture
             
             PAST MEDICAL HISTORY:
             - Hypertension (diagnosed 2018)
-            - Type 2 Diabetes Mellitus (controlled with Metformin)
-            - Smoker (1 pack/day for 20 years, quit 2022)
+            - Type 2 Diabetes Mellitus
+            - Smoker
             
             MEDICATIONS:
             - Lisinopril 10mg daily
@@ -26,7 +26,9 @@ const patients = [
             - Penicillin (Rash)
             
             RECENT EVENTS:
-            Presented to ER with high grade fever (39.5C), productive cough with rusty sputum, and shortness of breath. CXR showed right lower lobe consolidation. Admitted to ICU for respiratory monitoring. SpO2 dropped to 88% on RA, now on 4L NC.
+            Involved in a motor vehicle accident (MVA). GCS 13 at scene, dropped to 10 in ER. CT Head shows small subdural hematoma (Head/Neuro). Patient complains of severe headache and dizziness. 
+            Right leg (Limb) shows open femur fracture, external fixation applied. 
+            Observation for neurological deterioration (seizures).
         `
     },
     {
@@ -37,22 +39,24 @@ const patients = [
             AGE: 62
             GENDER: Female
             
-            ADMISSION DIAGNOSIS: Sepsis likely secondary to UTI
+            ADMISSION DIAGNOSIS: Acute Pancreatitis & Sepsis
             
             PAST MEDICAL HISTORY:
-            - Recurrent UTIs
+            - Gallstones (Cholelithiasis)
             - Osteoporosis
-            - Chronic Kidney Disease (Stage 3)
+            - CKD Stage 3
             
             MEDICATIONS:
-            - Calcium + Vitamin D supplements
-            - Alendronate weekly
+            - Creon
+            - Alendronate
             
             ALLERGIES:
-            - Sulfa Drugs (Anaphylaxis)
+            - Sulfa Drugs
             
             RECENT EVENTS:
-            Confusion and lethargy noted by family. Hypotensive (BP 85/50) upon arrival. Lactate 4.2. Started on IV fluids and Broad spectrum antibiotics (Meropenem). Urine culture pending. Central line placed. Requiring low dose Norepinephrine.
+            Severe epigastric abdominal pain radiating to back (Abdomen). Nausea and vomiting x5. Lipase > 3000. CT Abdomen confirms necrotizing pancreatitis.
+            On IV Fluids. Hypotensive responsive to fluids.
+            Complains of generalized weakness in limbs due to hypocalcemia (Limbs/Neuro).
         `
     },
     {
@@ -63,23 +67,23 @@ const patients = [
             AGE: 78
             GENDER: Male
             
-            ADMISSION DIAGNOSIS: Acute Decompensated Heart Failure
+            ADMISSION DIAGNOSIS: Acute Decompensated Heart Failure & Gout
             
             PAST MEDICAL HISTORY:
             - Ischemic Cardiomyopathy (EF 35%)
-            - CABG x3 (2015)
-            - Atrial Fibrillation
+            - Gouty Arthritis
             
             MEDICATIONS:
-            - Furosemide 40mg daily
-            - Carvedilol 6.25mg BID
-            - Apixaban 5mg BID
+            - Lasix
+            - Allopurinol
             
             ALLERGIES:
-            - NKDA (No Known Drug Allergies)
+            - NKDA
             
             RECENT EVENTS:
-            Progressive dyspnea over 3 days. Orthopnea +++. Lower limb edema extending to thighs. BNP > 5000. CXR shows pulmonary edema. Started on IV Lasix infusion. BP stable but patient is tachypneic. Monitoring for arrhythmias.
+            Presented with shortness of breath (Chest) and orthopnea. Bilateral pitting edema in legs extending to knees (Limbs). 
+            Right big toe is swollen, red, and tender (Gout/Limbs).
+            BNP elevated. Started on diuretics. Monitoring renal function (Abdomen/Renal).
         `
     },
     {
@@ -90,24 +94,24 @@ const patients = [
             AGE: 35
             GENDER: Female
             
-            ADMISSION DIAGNOSIS: Acute Severe Asthma Exacerbation
+            ADMISSION DIAGNOSIS: Severe Asthma & Migraine
             
             PAST MEDICAL HISTORY:
-            - Asthma (since childhood)
-            - Eczema
-            - Anxiety Disorder
+            - Asthma
+            - Chronic Migraines
+            - Anxiety
             
             MEDICATIONS:
-            - Albuterol Inhaler PRN
-            - Fluticasone/Salmeterol daily
-            - Sertraline 50mg daily
+            - Albuterol
+            - Sumatriptan
             
             ALLERGIES:
-            - Aspirin (Wheezing)
-            - Dust Mites
+            - Aspirin
             
             RECENT EVENTS:
-            Sudden onset severe wheezing after exposure to neighbor's cat. Failed home neb treatments x3. ER presentation with silent chest and peak flow < 40%. Given IV Magnesium, Solu-Medrol, and continuous Albuterol nebs. Avoided intubation so far but remains high risk.
+            Exacerbation of asthma with severe wheezing (Chest). SpO2 92% on room air.
+            Concurrent severe migraine episode with photophobia and nausea (Head).
+            Patient reports tingling sensation in fingers (Limbs/Neuro) likely due to hyperventilation.
         `
     }
 ];

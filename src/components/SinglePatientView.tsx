@@ -13,6 +13,7 @@ import ReactMarkdown from 'react-markdown'; // Import ReactMarkdown
 import { ChatModal } from './ChatModal';
 import { HandoverModal } from './HandoverModal';
 import { MessageCircle, FileOutput } from 'lucide-react';
+import { AnatomyViewer } from './AnatomyViewer';
 
 // Define types locally or import if shared
 interface MedicalRecord {
@@ -235,16 +236,24 @@ export function SinglePatientView({ aiSettings }: SinglePatientViewProps) {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div className="bg-clinical-800 rounded-xl p-6 border border-slate-700 h-fit">
-                        <h2 className="text-xl font-bold text-white mb-4">Patient Demographics</h2>
-                        <div className="space-y-3">
-                            <p className="flex justify-between border-b border-slate-700 pb-2"><span className="text-slate-400">Name</span> <span>{patient.name}</span></p>
-                            <p className="flex justify-between border-b border-slate-700 pb-2"><span className="text-slate-400">Age</span> <span>{patient.age}</span></p>
-                            <p className="flex justify-between border-b border-slate-700 pb-2"><span className="text-slate-400">Gender</span> <span>{patient.gender}</span></p>
-                            <p className="flex justify-between border-b border-slate-700 pb-2"><span className="text-slate-400">Condition</span> <span>{patient.condition}</span></p>
+                    <div className="bg-clinical-800 rounded-xl p-6 border border-slate-700 h-fit space-y-8">
+                        <div>
+                            <h2 className="text-xl font-bold text-white mb-4">Patient Demographics</h2>
+                            <div className="space-y-3">
+                                <p className="flex justify-between border-b border-slate-700 pb-2"><span className="text-slate-400">Name</span> <span>{patient.name}</span></p>
+                                <p className="flex justify-between border-b border-slate-700 pb-2"><span className="text-slate-400">Age</span> <span>{patient.age}</span></p>
+                                <p className="flex justify-between border-b border-slate-700 pb-2"><span className="text-slate-400">Gender</span> <span>{patient.gender}</span></p>
+                                <p className="flex justify-between border-b border-slate-700 pb-2"><span className="text-slate-400">Condition</span> <span>{patient.condition}</span></p>
+                            </div>
                         </div>
 
-                        <div className="mt-8">
+                        {/* Interactive Anatomy Viewer */}
+                        <div>
+                            <h3 className="text-lg font-semibold text-white mb-4">Interactive System Review</h3>
+                            <AnatomyViewer vitals={vitals} history={patient.patientContextSummary || ''} />
+                        </div>
+
+                        <div>
                             <h3 className="text-lg font-semibold text-white mb-2">History Summary</h3>
                             <div className="bg-slate-900/50 p-4 rounded-lg text-sm text-slate-300 leading-relaxed border border-slate-700 prose prose-invert max-w-none">
                                 <ReactMarkdown>
