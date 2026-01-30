@@ -1,8 +1,67 @@
 # 🏥 AI-Augmented ICU Monitoring Dashboard
 
-An advanced full-stack dashboard that monitors patient vital signs, manages patient history, and uses local AI to provide real-time clinical insights and priority alerts.
+## 📋 Project Description
+
+The AI-Augmented ICU Monitoring Dashboard is a comprehensive healthcare solution designed to revolutionize intensive care unit patient monitoring through intelligent automation and real-time analytics. This full-stack application combines modern web technologies with cutting-edge machine learning to provide healthcare professionals with actionable insights, predictive alerts, and seamless patient management capabilities.
+
+Built with privacy and offline functionality in mind, the system processes all AI operations locally using Ollama (Large Language Model) and TensorFlow.js, ensuring patient data never leaves your infrastructure. The dashboard serves as a centralized command center for ICU operations, integrating vital sign monitoring, patient history management, bed allocation, and AI-powered clinical decision support.
+
+**Key Technologies**: React, TypeScript, Node.js, Express, PostgreSQL, Prisma ORM, TensorFlow.js, Ollama LLM, Tailwind CSS
 
 ## ✨ Features
+
+### 🩺 Real-Time Patient Monitoring
+*   **Live Vital Signs Visualization**: Continuous tracking and display of Heart Rate, Blood Pressure, SpO2, Respiratory Rate, and Temperature
+*   **Interactive Body Map**: Anatomical visualization showing vital sign locations and status indicators
+*   **Dynamic Graphs**: Real-time plotting of vital trends with customizable time windows
+*   **Color-Coded Status Indicators**: Instant visual feedback on patient stability
+
+### 🏥 Patient Management System
+*   **Complete Admission Workflow**: Streamlined patient intake with comprehensive demographic and clinical data collection
+*   **Bed Assignment & Tracking**: Real-time bed occupancy management across ICU wards
+*   **Patient Discharge Process**: Structured discharge workflow with handover notes and summary generation
+*   **Patient Search & Filtering**: Quick access to patient records with advanced filtering options
+
+### 📄 Medical History & Documentation
+*   **PDF Upload & Parsing**: Upload medical records, lab results, and diagnostic reports
+*   **Intelligent Document Processing**: Automatic extraction and summarization of medical documents
+*   **Historical Data Integration**: Seamless integration of past medical history with current monitoring data
+*   **Document Library**: Organized repository of all patient-related documents
+
+### 🤖 AI-Powered Clinical Insights
+*   **AI Cortex Chat Interface**: Natural language interaction with an AI assistant that understands patient context
+*   **Contextual Analysis**: AI considers both real-time vitals and complete medical history for assessments
+*   **Plain English Explanations**: Complex medical data translated into clear, actionable insights
+*   **Local LLM Processing**: All AI operations run on-premises using Ollama for complete data privacy
+
+### ⚠️ Smart Alert System
+*   **Neural Network Priority Prediction**: TensorFlow.js model analyzes vital patterns to predict clinical urgency
+*   **Four-Tier Alert Levels**: Critical, Urgent, Warning, and Normal classifications
+*   **Real-Time Alert Feed**: Chronological display of all system alerts with timestamps
+*   **Predictive Early Warning**: Identifies deteriorating patients before critical events
+
+### 💾 Data Persistence & Security
+*   **PostgreSQL Database**: Robust, enterprise-grade data storage
+*   **Prisma ORM**: Type-safe database operations with migrations and schema management
+*   **Structured Data Models**: Normalized database design for patients, beds, vitals, and medical records
+*   **Offline-First Architecture**: Full functionality without external cloud dependencies
+
+### 🔒 Privacy & Compliance
+*   **Local AI Processing**: All machine learning and LLM operations happen on your infrastructure
+*   **No External API Calls**: Patient data never transmitted to third-party services
+*   **Secure File Storage**: Medical documents stored locally with proper access controls
+*   **Audit Trail**: Comprehensive logging of all system operations
+
+### 🎨 User Experience
+*   **Modern UI/UX**: Clean, intuitive interface built with Tailwind CSS
+*   **Responsive Design**: Optimized for desktop workstations and tablets
+*   **Ward View Dashboard**: Overview of all active patients with key metrics at a glance
+*   **Detailed Patient Profiles**: Comprehensive view combining vitals, history, and AI insights
+*   **Mini Card Views**: Quick reference cards for rapid patient assessment
+
+---
+
+## ✨ Core Features Summary
 
 *   **Real-time Monitoring**: Visualizes live vital signs (Heart Rate, BP, SpO2, RR, Temp).
 *   **Patient Management**: Full admission and discharge workflow with bed management.
