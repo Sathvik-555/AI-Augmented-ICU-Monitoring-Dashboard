@@ -138,9 +138,9 @@ AI CONFIDENCE: ${(confidence * 100).toFixed(1)}%
         let action = "Continue monitoring.";
 
         if (priority === 1) {
-            summary = "CRITICAL INSTABILITY DETECTED";
+            summary = "Critical Instability Detected";
             reasoning = "ML Model detected critical pattern.";
-            action = "ACTIVATE RAPID RESPONSE TEAM IMMEDIATELY.";
+            action = "Activate Rapid Response Team immediately.";
         } else if (priority === 2) {
             summary = "Urgent Clinical Deterioration";
             reasoning = "ML Model detected urgent deterioration.";
@@ -169,8 +169,8 @@ export function runFallbackAnalysis(vitals: VitalSigns): AIAnalysis {
     let action = "Continue monitoring.";
 
     if (priority === 1) {
-        summary = "CRITICAL INSTABILITY DETECTED";
-        action = "ACTIVATE RAPID RESPONSE TEAM IMMEDIATELY.";
+        summary = "Critical Instability Detected";
+        action = "Activate Rapid Response Team immediately.";
     } else if (priority === 2) {
         summary = "Urgent Clinical Deterioration";
         action = "Assess airway, breathing, circulation. Consider fluid bolus or O2 therapy.";

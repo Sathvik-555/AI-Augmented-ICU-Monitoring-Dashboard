@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { useVitalSimulator, ClinicalScenario } from '../lib/simulator';
 import { analyzeVitals, AIAnalysis, runFallbackAnalysis, AIConfig } from '../lib/ai-service';
 import { fetchPatient, uploadHistory } from '../lib/api';
@@ -13,7 +13,9 @@ import ReactMarkdown from 'react-markdown'; // Import ReactMarkdown
 import { ChatModal } from './ChatModal';
 import { HandoverModal } from './HandoverModal';
 import { MessageCircle, FileOutput } from 'lucide-react';
+
 import { AnatomyViewer } from './AnatomyViewer';
+import { OrganVisualizer } from './OrganVisualizer';
 
 // Define types locally or import if shared
 interface MedicalRecord {
@@ -37,6 +39,16 @@ interface SinglePatientViewProps {
     aiSettings: AIConfig;
 }
 
+// Helper to map condition to scenario
+function mapConditionToScenario(condition: string): ClinicalScenario {
+    if (!condition) return 'NORMAL';
+    const lower = condition.toLowerCase();
+    if (lower.includes('sepsis')) return 'SEPSIS';
+    if (lower.includes('heart') || lower.includes('cardiac')) return 'CARDIAC_INSTABILITY';
+    if (lower.includes('asthma') || lower.includes('respiratory') || lower.includes('pneumonia')) return 'RESPIRATORY_DISTRESS';
+    return 'NORMAL';
+}
+
 export function SinglePatientView({ aiSettings }: SinglePatientViewProps) {
     const { id } = useParams<{ id: string }>();
     const [patient, setPatient] = useState<PatientDetails | null>(null);
@@ -44,10 +56,11 @@ export function SinglePatientView({ aiSettings }: SinglePatientViewProps) {
     const [activeTab, setActiveTab] = useState<'monitor' | 'history'>('monitor');
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [isHandoverOpen, setIsHandoverOpen] = useState(false);
+    const [selectedVisual, setSelectedVisual] = useState<'heart' | 'lungs' | null>(null);
 
 
-    // Simulator state
-    const [scenario, setScenario] = useState<ClinicalScenario>('NORMAL');
+    const location = useLocation();
+    const [scenario, setScenario] = useState<ClinicalScenario>((location.state as any)?.scenario || 'NORMAL');
     const { vitals, history } = useVitalSimulator(scenario);
 
     // AI state
@@ -69,9 +82,10 @@ export function SinglePatientView({ aiSettings }: SinglePatientViewProps) {
                 if (data.status === 'DISCHARGED') {
                     setActiveTab('history');
                 }
-                // Map DB scenario to simulator scenario if needed, or default
-                // ideally DB has a field for CURRENT simulation scenario
-                if (data.scenario) setScenario(data.scenario as ClinicalScenario);
+
+                // Map DB condition to simulator scenario
+                const mappedScenario = mapConditionToScenario(data.condition || '');
+                setScenario(mappedScenario);
             })
             .catch(console.error)
             .finally(() => setLoading(false));
@@ -90,11 +104,13 @@ export function SinglePatientView({ aiSettings }: SinglePatientViewProps) {
             return prev;
         });
 
-        const now = Date.now();
+        /* 
+        // Disabled automatic alert popup generation as per user request
         if (immediateAnalysis.priority <= 2 && (now - lastAlertTime.current > 10000)) {
             setAlerts(prev => [...prev, immediateAnalysis]);
             lastAlertTime.current = now;
-        }
+        } 
+        */
     }, [vitals]);
 
     // AI Analysis Interval
@@ -206,10 +222,11 @@ export function SinglePatientView({ aiSettings }: SinglePatientViewProps) {
             {activeTab === 'monitor' ? (
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     <div className="lg:col-span-8 space-y-6">
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <VitalCard label="Heart Rate" value={vitals.hr} unit="bpm" icon={Heart} color="text-red-400" />
+                        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                            <VitalCard label="Heart Rate" value={vitals.hr} unit="bpm" icon={Heart} color="text-red-400" onClick={() => setSelectedVisual('heart')} />
                             <VitalCard label="Blood Pressure" value={`${vitals.sbp}/${vitals.dbp}`} unit="mmHg" icon={Activity} color="text-blue-400" />
-                            <VitalCard label="SpO2" value={vitals.spo2} unit="%" icon={Wind} color="text-green-400" />
+                            <VitalCard label="SpO2" value={vitals.spo2} unit="%" icon={Wind} color="text-green-400" onClick={() => setSelectedVisual('lungs')} />
+                            <VitalCard label="Resp Rate" value={vitals.rr} unit="/min" icon={Wind} color="text-teal-400" onClick={() => setSelectedVisual('lungs')} />
                             <VitalCard label="Temp" value={vitals.temp} unit="°C" icon={Thermometer} color="text-orange-400" />
                         </div>
                         <VitalsGraph data={history} />
@@ -308,9 +325,12 @@ export function SinglePatientView({ aiSettings }: SinglePatientViewProps) {
                 isOpen={isHandoverOpen}
                 onClose={() => setIsHandoverOpen(false)}
                 patientId={id || ''}
+
                 patientName={patient ? patient.name : 'Unknown'}
                 vitals={vitals}
             />
+
+            <OrganVisualizer type={selectedVisual} vitals={vitals} onClose={() => setSelectedVisual(null)} />
         </div>
     );
 }

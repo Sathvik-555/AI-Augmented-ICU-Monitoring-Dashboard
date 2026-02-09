@@ -1,5 +1,7 @@
+import { useRef, useEffect } from 'react';
 import { useVitalSimulator, ClinicalScenario } from '../lib/simulator';
 import { calculatePriority } from '../lib/ai-service';
+import { useToast } from './Toast';
 
 import { Activity, Heart, Wind, AlertTriangle } from 'lucide-react';
 import { clsx } from 'clsx';
@@ -20,6 +22,19 @@ export function PatientMiniCard({ patient, onClick }: PatientMiniCardProps) {
     // Each card runs its own simulation
     const { vitals } = useVitalSimulator(patient.scenario);
     const { priority } = calculatePriority(vitals);
+    const { showToast } = useToast();
+    const lastAlert = useRef<number>(0);
+
+    useEffect(() => {
+        if (priority === 1) {
+            const now = Date.now();
+            // Alert only once per minute to avoid spam
+            if (now - lastAlert.current > 60000) {
+                showToast(`📧 Email Dispatch: Critical Alert sent to Doctor for ${patient.bed}`, 'error');
+                lastAlert.current = now;
+            }
+        }
+    }, [priority, patient.bed, showToast]);
 
     const getPriorityColor = (p: number) => {
         switch (p) {

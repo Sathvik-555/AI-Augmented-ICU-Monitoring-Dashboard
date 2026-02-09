@@ -8,11 +8,15 @@ interface VitalCardProps {
     unit: string;
     icon: LucideIcon;
     color: string;
+    onClick?: () => void;
 }
 
-export function VitalCard({ label, value, unit, icon: Icon, color }: VitalCardProps) {
+export function VitalCard({ label, value, unit, icon: Icon, color, onClick }: VitalCardProps) {
     return (
-        <Card className="flex flex-col items-center justify-center py-8 relative overflow-hidden group hover:border-blue-500/30 transition-all duration-500">
+        <div onClick={onClick} className={clsx(
+            "relative flex flex-col items-center justify-center py-8 overflow-hidden group hover:border-blue-500/30 transition-all duration-500 bg-slate-800/50 rounded-xl border border-white/5",
+            onClick && "cursor-pointer hover:bg-slate-800/80 active:scale-95"
+        )}>
             {/* Background Glow Effect */}
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
@@ -33,6 +37,6 @@ export function VitalCard({ label, value, unit, icon: Icon, color }: VitalCardPr
                     </div>
                 </div>
             </div>
-        </Card>
+        </div>
     );
 }

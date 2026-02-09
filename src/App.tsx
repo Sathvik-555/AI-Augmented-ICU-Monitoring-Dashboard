@@ -4,7 +4,8 @@ import { SettingsModal } from './components/SettingsModal';
 import { PatientList } from './components/PatientList';
 import { WardPage } from './components/WardPage'; // Import WardPage
 import { SinglePatientView } from './components/SinglePatientView';
-import { Settings as SettingsIcon, LayoutDashboard, BedDouble } from 'lucide-react'; // Import BedDouble
+import { Settings as SettingsIcon, LayoutDashboard, BedDouble } from 'lucide-react';
+import { ToastProvider } from './components/Toast';
 
 function AppContent() {
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -85,7 +86,9 @@ function AppContent() {
 export default function App() {
     return (
         <BrowserRouter>
-            <AppContent />
+            <ToastProvider>
+                <AppContent />
+            </ToastProvider>
         </BrowserRouter>
     );
 }

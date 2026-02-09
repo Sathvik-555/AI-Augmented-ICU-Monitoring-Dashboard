@@ -87,7 +87,8 @@ export function WardPage() {
             setSelectedBed(bed);
             setIsAdmitOpen(true);
         } else if (bed.patient) {
-            navigate(`/patient/${bed.patient.id}`);
+            const scenario = mapConditionToScenario(bed.patient.condition);
+            navigate(`/patient/${bed.patient.id}`, { state: { scenario } });
         }
     };
 
