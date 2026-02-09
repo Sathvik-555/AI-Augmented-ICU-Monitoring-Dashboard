@@ -27,8 +27,10 @@ export function HandoverModal({ isOpen, onClose, patientId, patientName, vitals 
         setReport('');
         try {
             const data = await fetchHandoverReport(patientId, vitals);
-            setReport(data.report);
+            // Ensure we are setting the string report, handling if it's wrapped in an object or just a string
+            setReport(typeof data.report === 'string' ? data.report : JSON.stringify(data.report));
         } catch (error) {
+            console.error(error);
             setReport("Error generating report. Please try again.");
         } finally {
             setLoading(false);
@@ -65,7 +67,7 @@ export function HandoverModal({ isOpen, onClose, patientId, patientName, vitals 
                             <p className="text-slate-400 animate-pulse">Generating SBAR Report...</p>
                         </div>
                     ) : (
-                        <div className="prose prose-invert max-w-none">
+                        <div className="prose prose-invert prose-p:leading-relaxed prose-headings:text-blue-200 prose-ul:my-2 prose-li:my-0 max-w-none text-sm md:text-base">
                             <ReactMarkdown>{report}</ReactMarkdown>
                         </div>
                     )}

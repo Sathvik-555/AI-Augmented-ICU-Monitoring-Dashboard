@@ -55,85 +55,55 @@ function normalize(vitals: VitalSigns): number[] {
 //     };
 // }
 
-// load the actual data:
-async function loadTrainingDataFromCSV() {
-    const response = await fetch('/data/icu_train.csv');
-    const text = await response.text();
-
-    const lines = text.trim().split('\n');
-//   const headers = lines[0].split(',');
-
-    const inputs: number[][] = [];
-    const labels: number[] = [];
-
-    for (let i = 1; i < lines.length; i++) {
-        const values = lines[i].split(',').map(Number);
-
-        const vitals = {
-            hr: values[0],
-            sbp: values[1],
-            dbp: values[2],
-            spo2: values[3],
-            rr: values[4],
-            temp: values[5],
-            timestamp: Date.now()
-        };
-
-        const { priority } = calculatePriority(vitals);
-
-        inputs.push(normalize(vitals));
-        labels.push(priority - 1);
-    }
-
-    return {
-        inputs: tf.tensor2d(inputs),
-        labels: tf.oneHot(tf.tensor1d(labels, 'int32'), 4)
-    };
-}
-
-
-export async function trainModel() {
+// Reconstruct model from manual weights
+async function loadModelFromWeights() {
     if (model || isTraining) return;
     isTraining = true;
-    console.log('[ML Service] Starting model training...');
-
     try {
+        console.log("[ML Service] Loading model weights from /models/vital-monitor/manual_weights.json...");
+        const response = await fetch('/models/vital-monitor/manual_weights.json');
+        if (!response.ok) throw new Error("Failed to fetch weights");
+
+        const weightsData = await response.json();
+
         const newModel = tf.sequential();
-        newModel.add(tf.layers.dense({ units: 16, activation: 'relu', inputShape: [6] }));
-        newModel.add(tf.layers.dense({ units: 12, activation: 'relu' }));
-        newModel.add(tf.layers.dense({ units: 4, activation: 'softmax' }));
 
-        newModel.compile({
-            optimizer: tf.train.adam(0.01),
-            loss: 'categoricalCrossentropy',
-            metrics: ['accuracy']
-        });
+        // Layer 1: Dense 16, ReLU, Input 6
+        newModel.add(tf.layers.dense({
+            units: 16,
+            activation: 'relu',
+            inputShape: [6],
+            weights: [
+                tf.tensor2d(weightsData[0].kernel),
+                tf.tensor1d(weightsData[0].bias)
+            ]
+        }));
 
-        const { inputs, labels } = await loadTrainingDataFromCSV();
+        // Layer 2: Dense 12, ReLU
+        newModel.add(tf.layers.dense({
+            units: 12,
+            activation: 'relu',
+            weights: [
+                tf.tensor2d(weightsData[1].kernel),
+                tf.tensor1d(weightsData[1].bias)
+            ]
+        }));
 
-        await newModel.fit(inputs, labels, {
-            epochs: 20,
-            batchSize: 32,
-            shuffle: true,
-            callbacks: {
-                onEpochEnd: (epoch, logs) => {
-                    if (epoch % 5 === 0) {
-                        console.log(`[ML Service] Epoch ${epoch}: loss = ${logs?.loss.toFixed(4)}, acc = ${logs?.acc.toFixed(4)}`);
-                    }
-                }
-            }
-        });
+        // Layer 3: Dense 4, Softmax
+        newModel.add(tf.layers.dense({
+            units: 4,
+            activation: 'softmax',
+            weights: [
+                tf.tensor2d(weightsData[2].kernel),
+                tf.tensor1d(weightsData[2].bias)
+            ]
+        }));
 
         model = newModel;
-        console.log('[ML Service] Model training complete.');
-        console.log('[ML] Number of training samples:', inputs.shape[0]);
-
-        // Cleanup tensors
-        inputs.dispose();
-        labels.dispose();
+        console.log("[ML Service] Model constructed from weights successfully.");
 
     } catch (error) {
-        console.error('[ML Service] Training failed:', error);
+        console.error('[ML Service] Failed to load model weights:', error);
     } finally {
         isTraining = false;
     }
@@ -141,7 +111,7 @@ export async function trainModel() {
 
 export async function predictPriority(vitals: VitalSigns): Promise<{ priority: PriorityLevel; confidence: number }> {
     if (!model) {
-        await trainModel();
+        await loadModelFromWeights();
     }
 
     if (!model) {

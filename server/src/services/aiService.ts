@@ -92,7 +92,13 @@ export async function chatWithPatient(patientId: string, message: string): Promi
     Condition: ${patient.condition}.
     Medical History: ${context}
     
-    Answer the doctor's question accurately based on the history. If unknown, say so. Keep answers professional and clinical.`;
+    Answer the doctor's question accurately based on the history. If unknown, say so. Keep answers professional and clinical.
+    
+    IMPORTANT FORMATTING INSTRUCTIONS:
+    - Use Markdown for all lists and headers.
+    - Use **bold** for key terms.
+    - Use dashed lists (-) for points.
+    - Do not output a single long paragraph. Break it down.`;
 
     const userPrompt = message;
 

@@ -131,7 +131,34 @@ AI CONFIDENCE: ${(confidence * 100).toFixed(1)}%
 
     } catch (error) {
         console.error("[AI Service] Analysis failed:", error);
-        return runFallbackAnalysis(vitals);
+
+        // Use ML priority but fallback text if Ollama fails
+        let summary = "Patient is stable.";
+        let reasoning = "Vitals within normal limits (ML Prediction).";
+        let action = "Continue monitoring.";
+
+        if (priority === 1) {
+            summary = "CRITICAL INSTABILITY DETECTED";
+            reasoning = "ML Model detected critical pattern.";
+            action = "ACTIVATE RAPID RESPONSE TEAM IMMEDIATELY.";
+        } else if (priority === 2) {
+            summary = "Urgent Clinical Deterioration";
+            reasoning = "ML Model detected urgent deterioration.";
+            action = "Assess airway, breathing, circulation.";
+        } else if (priority === 3) {
+            summary = "Abnormal Vitals - Warning";
+            reasoning = "ML Model detected warning signs.";
+            action = "Increase monitoring frequency.";
+        }
+
+        return {
+            priority,
+            summary,
+            reasoning,
+            suggested_action: action,
+            timestamp: Date.now(),
+            source: 'TensorFlow.js (Ollama Offline)'
+        };
     }
 }
 

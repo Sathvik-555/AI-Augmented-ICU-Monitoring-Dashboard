@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { X, Send, Bot } from 'lucide-react';
 import { sendAIChatMessage } from '../lib/api';
+import ReactMarkdown from 'react-markdown';
 
 interface ChatModalProps {
     isOpen: boolean;
@@ -70,10 +71,12 @@ export function ChatModal({ isOpen, onClose, patientId, patientName }: ChatModal
                     {messages.map((m, i) => (
                         <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                             <div className={`max-w-[80%] p-3 rounded-lg text-sm ${m.role === 'user'
-                                    ? 'bg-blue-600 text-white rounded-br-none'
-                                    : 'bg-slate-800 text-slate-200 rounded-bl-none'
+                                ? 'bg-blue-600 text-white rounded-br-none'
+                                : 'bg-slate-800 text-slate-200 rounded-bl-none'
                                 }`}>
-                                {m.text}
+                                <div className="prose prose-invert prose-sm max-w-none leading-relaxed">
+                                    <ReactMarkdown>{m.text}</ReactMarkdown>
+                                </div>
                             </div>
                         </div>
                     ))}
