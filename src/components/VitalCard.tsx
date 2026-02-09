@@ -12,12 +12,26 @@ interface VitalCardProps {
 
 export function VitalCard({ label, value, unit, icon: Icon, color }: VitalCardProps) {
     return (
-        <Card className="flex flex-col items-center justify-center py-6 hover:bg-clinical-700/50 transition-colors duration-300">
-            <div className="flex items-center gap-2 mb-2 text-slate-400 text-sm uppercase tracking-wider">
-                <Icon className="w-4 h-4" /> {label}
-            </div>
-            <div className={clsx("text-3xl font-bold tabular-nums", color)}>
-                {value} <span className="text-sm text-slate-500 font-normal">{unit}</span>
+        <Card className="flex flex-col items-center justify-center py-8 relative overflow-hidden group hover:border-blue-500/30 transition-all duration-500">
+            {/* Background Glow Effect */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+            <div className="relative z-10 flex flex-col items-center gap-4">
+                <div className="p-3 bg-slate-800/50 rounded-full border border-white/5 group-hover:scale-110 group-hover:bg-slate-800/80 transition-all duration-300 shadow-inner">
+                    <Icon className={clsx("w-6 h-6 transition-colors duration-300", color.replace('text-', 'text-'))} />
+                </div>
+
+                <div className="text-center">
+                    <div className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1 opacity-70 group-hover:opacity-100 transition-opacity">
+                        {label}
+                    </div>
+                    <div className="flex items-baseline gap-1">
+                        <span className={clsx("text-4xl font-black tracking-tight drop-shadow-lg", color)}>
+                            {value}
+                        </span>
+                        <span className="text-sm text-slate-500 font-medium">{unit}</span>
+                    </div>
+                </div>
             </div>
         </Card>
     );

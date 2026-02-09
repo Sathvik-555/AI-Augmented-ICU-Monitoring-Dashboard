@@ -51,6 +51,16 @@ export async function dischargePatient(bedId: string) {
     return res.json();
 }
 
+export async function movePatient(currentBedId: string, targetBedId: string) {
+    const res = await fetch(`${API_BASE}/beds/${currentBedId}/move`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ targetBedId })
+    });
+    if (!res.ok) throw new Error('Move failed');
+    return res.json();
+}
+
 export async function sendAIChatMessage(patientId: string, message: string) {
     const res = await fetch(`${API_BASE}/ai/chat`, {
         method: 'POST',

@@ -13,6 +13,28 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background-color: #0f172a; /* clinical-900 */
+  /* Modern deep gradient background */
+  background: radial-gradient(circle at top center, #1e293b, #0f172a); 
   color: #f1f5f9;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Scrollbar for a sleek look */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f172a; 
+}
+
+::-webkit-scrollbar-thumb {
+  background: #334155; 
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #475569; 
 }
